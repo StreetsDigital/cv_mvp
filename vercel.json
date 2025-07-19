@@ -14,9 +14,5 @@
       "src": "/(.*)",
       "dest": "/app/main.py"
     }
-  ],
-  "env": {
-    "ANTHROPIC_API_KEY": "@anthropic_api_key",
-    "SECRET_KEY": "@secret_key"
-  }
+  ]
 }
