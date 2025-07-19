@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Automation - recruitment.automateengage.com</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e2022 0%, #2a2c2e 100%);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Top Brand Header */
+        .brand-header {
+            background: #ffffff;
+            padding: 1rem 2rem;
+            border-bottom: 2px solid #c7ae6a;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .brand-logo:hover {
+            transform: translateY(-1px);
+        }
+
+        .brand-logo-placeholder {
+            width: 200px;
+            height: 50px;
+            background: linear-gradient(135deg, #c7ae6a 0%, #b99a45 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e2022;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-tagline {
+            color: #64748b;
+            font-size: 0.95rem;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .app-wrapper {
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            min-height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e2022 0%, #2a2c2e 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid #c7ae6a;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        .header h1 i {
+            color: #c7ae6a;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #c7ae6a 0%, #b99a45 100%);
+            color: #1e2022;
+            border: 2px solid #c7ae6a;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #b99a45 0%, #a08735 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(199, 174, 106, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(199, 174, 106, 0.15);
+            color: white;
+            border: 2px solid rgba(199, 174, 106, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(199, 174, 106, 0.25);
+            border-color: #c7ae6a;
+            transform: translateY(-1px);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+
+        /* Quick Form */
+        .quick-form {
+            flex: 1;
+            padding: 2rem;
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-header h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .form-header p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-section:hover {
+            border-color: #c7ae6a;
+            box-shadow: 0 4px 12px rgba(199, 174, 106, 0.1);
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            background: #f9fafb;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area:hover {
+            border-color: #c7ae6a;
+            background: #faf9f7;
+        }
+
+        .file-upload-area.has-file {
+            border-color: #b99a45;
+            background: #faf9f7;
+        }
+
+        .file-upload-icon {
+            font-size: 2rem;
+            color: #9ca3af;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-area.has-file .file-upload-icon {
+            color: #b99a45;
+        }
+
+        .upload-text {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #b99a45;
+            margin-top: 0.5rem;
+        }
+
+        .form-divider {
+            text-align: center;
+            margin: 1rem 0;
+            color: #9ca3af;
+            position: relative;
+        }
+
+        .form-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+
+        .form-divider span {
+            background: white;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-textarea {
+            width: 100%;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+            line-height: 1.6;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #c7ae6a;
+            box-shadow: 0 0 0 3px rgba(199, 174, 106, 0.1);
+        }
+
+        .analyze-button {
+            width: 100%;
+            padding: 1.25rem 2rem;
+            background: linear-gradient(135deg, #c7ae6a 0%, #b99a45 100%);
+            color: #1e2022;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        .analyze-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #b99a45 0%, #a08735 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(199, 174, 106, 0.3);
+        }
+
+        .analyze-button:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Chat Interface */
+        .chat-interface {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .welcome-message {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .welcome-content h3 {
+            color: #1e293b;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .welcome-content p {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .method-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .method-option {
+            padding: 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .method-option:hover {
+            border-color: #c7ae6a;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(199, 174, 106, 0.15);
+        }
+
+        .method-option i {
+            font-size: 2rem;
+            color: #c7ae6a;
+            margin-bottom: 0.75rem;
+        }
+
+        .method-option h4 {
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .method-option p {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .features-note {
+            background: linear-gradient(135deg, #faf9f7 0%, #f5f3ef 100%);
+            border: 1px solid #c7ae6a;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .features-note strong {
+            color: #b99a45;
+        }
+
+        /* Input Area */
+        .input-container {
+            padding: 1.5rem;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #c7ae6a;
+            box-shadow: 0 0 0 3px rgba(199, 174, 106, 0.1);
+        }
+
+        .input-textarea {
+            flex: 1;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 1rem;
+            line-height: 1.5;
+            font-family: 'Inter', sans-serif;
+            max-height: 120px;
+            min-height: 40px;
+        }
+
+        .input-btn {
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .attach-btn {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .attach-btn:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .send-btn {
+            background: #c7ae6a;
+            color: #1e2022;
+            font-weight: 600;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: #b99a45;
+        }
+
+        .send-btn:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            padding: 0.75rem 1.5rem;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.875rem;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-connected {
+            color: #b99a45;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-connected i {
+            font-size: 0.5rem;
+        }
+
+        /* Results Preview */
+        .results-preview {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid #e2e8f0;
+            display: none;
+        }
+
+        .results-preview.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto 1rem;
+        }
+
+        .score-excellent { background: linear-gradient(135deg, #b99a45 0%, #a08735 100%); }
+        .score-good { background: linear-gradient(135deg, #c7ae6a 0%, #b99a45 100%); }
+        .score-fair { background: linear-gradient(135d, #d5c495 0%, #c7ae6a 100%); }
+        .score-poor { background: linear-gradient(135deg, #8a8a8a 0%, #6b6b6b 100%); }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .quick-form {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .brand-header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .brand-logo-placeholder {
+                width: 160px;
+                height: 40px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-wrapper {
+                padding: 10px;
+            }
+
+            .app-container {
+                border-radius: 15px;
+                min-height: calc(100vh - 100px);
+            }
+            
+            .brand-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .brand-logo-placeholder {
+                width: 140px;
+                height: 35px;
+                font-size: 0.75rem;
+            }
+
+            .brand-tagline {
+                font-size: 0.85rem;
+            }
+            
+            .header {
+                padding: 1rem 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .method-options {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                gap: 1.5rem;
+            }
+
+            .form-section {
+                padding: 1rem;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Brand Header -->
+    <div class="brand-header">
+        <div class="brand-header-content">
+            <a href="https://automateengage.com" class="brand-logo" target="_blank">
+                <div class="brand-logo-placeholder">
+                    <!-- Replace this placeholder with your actual logo image -->
+                    AUTOMATE ENGAGE LOGO
+                </div>
+            </a>
+            <div class="brand-tagline">
+                Automation and AI solutions for business growth
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app-wrapper">
+        <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-robot"></i>
+                    CV Automation Assistant
+                </h1>
+                <div class="header-actions">
+                    <button id="toggleView" class="btn btn-secondary">
+                        <i class="fas fa-comments"></i> <span>Chat Only</span>
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Analysis
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Quick Form -->
+            <div class="quick-form">
+                <div class="form-header">
+                    <h2>
+                        <i class="fas fa-bolt"></i>
+                        Quick CV Analysis
+                    </h2>
+                    <p>Upload a CV and job description for instant analysis</p>
+                </div>
+
+                <div class="form-grid">
+                    <!-- CV Input Section -->
+                    <div class="form-section">
+                        <div class="form-label">
+                            <i class="fas fa-file-user"></i>
+                            CV Document
+                        </div>
+                        
+                        <div class="file-upload-area" onclick="document.getElementById('cvFile').click()">
+                            <div class="file-upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">
+                                <strong>Click to upload CV</strong><br>
+                                or drag and drop here<br>
+                                <small>PDF, DOCX, DOC, TXT (Max 5MB)</small>
+                            </div>
+                            <input type="file" id="cvFile" style="display: none;" accept=".pdf,.docx,.doc,.txt">
+                        </div>
+
+                        <div class="form-divider">
+                            <span>OR</span>
+                        </div>
+
+                        <textarea 
+                            class="form-textarea" 
+                            rows="8" 
+                            placeholder="Paste CV text here...
+
+Example:
+John Smith
+Software Engineer
+john.smith@email.com
++1 (555) 123-4567
+
+EXPERIENCE:
+Senior Software Developer at TechCorp (2020-2024)
+- Developed web applications using React, Node.js
+- Led team of 5 developers
+- Implemented CI/CD pipelines
+
+SKILLS: JavaScript, Python, React, Node.js, AWS, Docker
+
+EDUCATION: 
+Bachelor's in Computer Science, MIT (2018)"
+                        ></textarea>
+                    </div>
+
+                    <!-- Job Description Section -->
+                    <div class="form-section">
+                        <div class="form-label">
+                            <i class="fas fa-briefcase"></i>
+                            Job Description
+                        </div>
+                        
+                        <textarea 
+                            class="form-textarea" 
+                            rows="12" 
+                            placeholder="Paste job description here...
+
+Example:
+Senior Full Stack Developer
+TechCorp Inc.
+
+We are seeking a Senior Full Stack Developer to join our growing team.
+
+REQUIREMENTS:
+- 5+ years of software development experience
+- Strong proficiency in JavaScript, React, Node.js
+- Experience with cloud platforms (AWS, Azure)
+- Bachelor's degree in Computer Science or related field
+- Experience with Docker and CI/CD pipelines
+
+PREFERRED:
+- Python programming experience
+- Leadership experience
+- Agile development methodology
+- REST API development"
+                            required
+                        ></textarea>
+                    </div>
+                </div>
+
+                <button class="analyze-button" onclick="runAnalysis()">
+                    <i class="fas fa-search"></i>
+                    Analyze CV Match
+                </button>
+
+                <!-- Results Preview -->
+                <div id="resultsPreview" class="results-preview">
+                    <div style="text-align: center;">
+                        <div class="score-circle score-excellent">
+                            85
+                        </div>
+                        <h3 style="color: #1e293b; margin-bottom: 1rem;">Analysis Complete!</h3>
+                        <p style="color: #64748b; margin-bottom: 1.5rem;">
+                            <strong>Candidate:</strong> John Smith<br>
+                            <strong>Position:</strong> Senior Full Stack Developer<br>
+                            <strong>Recommendation:</strong> Strong candidate - proceed with interview
+                        </p>
+                        
+                        <div style="text-align: left; background: #faf9f7; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #b99a45;">
+                            <h4 style="color: #b99a45; margin-bottom: 0.5rem;">✅ Strengths:</h4>
+                            <ul style="color: #4b5563; margin-left: 1.5rem;">
+                                <li>Matches 8/10 required skills</li>
+                                <li>4+ years relevant experience</li>
+                                <li>Strong technical background</li>
+                                <li>Leadership experience</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="text-align: left; background: #fefcf9; padding: 1rem; border-radius: 8px; border-left: 4px solid #d5c495;">
+                            <h4 style="color: #a08735; margin-bottom: 0.5rem;">⚠️ Areas to explore:</h4>
+                            <ul style="color: #4b5563; margin-left: 1.5rem;">
+                                <li>Azure cloud experience</li>
+                                <li>Agile methodology background</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Interface -->
+            <div class="chat-interface">
+                <div class="messages-container">
+                    <div class="welcome-message">
+                        <div class="welcome-content">
+                            <h3>
+                                <i class="fas fa-comments"></i>
+                                Chat-Based Analysis
+                            </h3>
+                            <p>Prefer a guided, conversational approach? Start chatting below and I'll walk you through the CV analysis process step by step.</p>
+                            
+                            <div class="method-options">
+                                <div class="method-option">
+                                    <i class="fas fa-upload"></i>
+                                    <h4>Upload Files</h4>
+                                    <p>Drag & drop CV files directly</p>
+                                </div>
+                                <div class="method-option">
+                                    <i class="fas fa-paste"></i>
+                                    <h4>Paste Text</h4>
+                                    <p>Copy/paste CV and job details</p>
+                                </div>
+                            </div>
+                            
+                            <div class="features-note">
+                                <strong>💡 Free MVP Features:</strong> Complete CV parsing, skills analysis, match scoring, hiring recommendations
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <button class="input-btn attach-btn">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <textarea 
+                            class="input-textarea" 
+                            placeholder="Type 'help' to start or upload a CV file..."
+                            rows="1"
+                        ></textarea>
+                        <button class="input-btn send-btn" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-connected">
+                <i class="fas fa-circle"></i>
+                Connected to recruitment.automateengage.com
+            </div>
+            <div>
+                MVP Version - <a href="mailto:andrew@automateengage.com" style="color: #c7ae6a; text-decoration: none;">Contact for Premium Features</a>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        class CVAutomationApp {
+            constructor() {
+                this.sessionId = this.generateSessionId();
+                this.actionCount = 0;
+                this.isRateLimited = false;
+                this.init();
+            }
+
+            generateSessionId() {
+                return 'session_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+            }
+
+            init() {
+                this.attachEventListeners();
+                this.trackAction(); // Initial page load
+            }
+
+            attachEventListeners() {
+                // Track all user interactions
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('button, .method-option, .analyze-button, .cta-primary, .cta-secondary')) {
+                        this.trackAction();
+                    }
+                });
+
+                // Switch view functionality - check if element exists
+                const toggleViewBtn = document.querySelector('#toggleView');
+                if (toggleViewBtn) {
+                    toggleViewBtn.addEventListener('click', () => {
+                        this.toggleView();
+                    });
+                }
+
+                // Form interactions - check if elements exist
+                const formElements = document.querySelectorAll('textarea, input[type="file"]');
+                formElements.forEach(element => {
+                    element.addEventListener('change', () => this.trackAction());
+                });
+
+                // Modal close events - check if elements exist
+                const closeUpgradeModal = document.getElementById('closeUpgradeModal');
+                const closeRateLimitModal = document.getElementById('closeRateLimitModal');
+                
+                if (closeUpgradeModal) {
+                    closeUpgradeModal.addEventListener('click', () => {
+                        this.hideModal('upgradeModal');
+                    });
+                }
+
+                if (closeRateLimitModal) {
+                    closeRateLimitModal.addEventListener('click', () => {
+                        this.hideModal('rateLimitModal');
+                    });
+                }
+
+                // Click outside modal to close
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('.modal')) {
+                        this.hideModal(e.target.id);
+                    }
+                });
+
+                // Analyze button - check if exists
+                const analyzeBtn = document.querySelector('.analyze-button');
+                if (analyzeBtn) {
+                    analyzeBtn.addEventListener('click', () => {
+                        this.runAnalysis();
+                    });
+                }
+
+                // File upload - check if exists
+                const cvFileInput = document.getElementById('cvFile');
+                if (cvFileInput) {
+                    cvFileInput.addEventListener('change', (e) => {
+                        this.handleFileUpload(e);
+                    });
+                }
+
+                // File upload area click - check if exists
+                const fileUploadArea = document.querySelector('.file-upload-area');
+                if (fileUploadArea) {
+                    fileUploadArea.addEventListener('click', () => {
+                        const fileInput = document.getElementById('cvFile');
+                        if (fileInput) {
+                            fileInput.click();
+                        }
+                    });
+                }
+            }
+
+            async trackAction() {
+                this.actionCount++;
+                
+                try {
+                    const response = await fetch('/api/track-action', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ session_id: this.sessionId })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.show_modal && !this.isRateLimited) {
+                        this.showUpgradeModal();
+                    }
+                } catch (error) {
+                    console.error('Action tracking error:', error);
+                }
+            }
+
+            async runAnalysis() {
+                const button = document.querySelector('.analyze-button');
+                const cvText = document.querySelector('.form-textarea').value;
+                const jobText = document.querySelectorAll('.form-textarea')[1].value;
+                const cvFile = document.getElementById('cvFile').files[0];
+
+                if (!jobText || (!cvText && !cvFile)) {
+                    alert('Please provide both CV and job description');
+                    return;
+                }
+
+                // Show loading state
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                button.disabled = true;
+
+                try {
+                    let finalCvText = cvText;
+                    
+                    // Handle file upload if present
+                    if (cvFile && !cvText) {
+                        const uploadResponse = await this.uploadFile(cvFile);
+                        if (uploadResponse.success) {
+                            finalCvText = uploadResponse.file_content;
+                        } else {
+                            throw new Error(uploadResponse.message);
+                        }
+                    }
+
+                    // Analyze CV
+                    const response = await fetch('/api/cv/analyze', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            cv_text: finalCvText,
+                            job_description: jobText
+                        })
+                    });
+
+                    if (response.status === 429) {
+                        // Rate limited
+                        const rateLimitData = await response.json();
+                        this.showRateLimitModal(rateLimitData.detail);
+                        this.isRateLimited = true;
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('Analysis failed');
+                    }
+
+                    const result = await response.json();
+                    this.showResults(result);
+
+                } catch (error) {
+                    console.error('Analysis error:', error);
+                    alert('Analysis failed: ' + error.message);
+                } finally {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }
+
+            async uploadFile(file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                return await response.json();
+            }
+
+            showResults(result) {
+                const resultsPreview = document.getElementById('resultsPreview');
+                const scoreClass = this.getScoreClass(result.overall_score);
+                
+                // Update score circle
+                const scoreCircle = resultsPreview.querySelector('.score-circle');
+                scoreCircle.textContent = Math.round(result.overall_score);
+                scoreCircle.className = `score-circle ${scoreClass}`;
+
+                // Update content
+                resultsPreview.querySelector('p').innerHTML = `
+                    <strong>Candidate:</strong> ${result.candidate_name}<br>
+                    <strong>Overall Score:</strong> ${result.overall_score}/100<br>
+                    <strong>Recommendation:</strong> ${result.recommendation}
+                `;
+
+                resultsPreview.classList.add('show');
+                resultsPreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            getScoreClass(score) {
+                if (score >= 80) return 'score-excellent';
+                if (score >= 65) return 'score-good';
+                if (score >= 50) return 'score-fair';
+                return 'score-poor';
+            }
+
+            handleFileUpload(e) {
+                const file = e.target.files[0];
+                const uploadArea = document.querySelector('.file-upload-area');
+                
+                if (file) {
+                    uploadArea.classList.add('has-file');
+                    uploadArea.innerHTML = `
+                        <div class="file-upload-icon">
+                            <i class="fas fa-file-check"></i>
+                        </div>
+                        <div class="upload-text">
+                            <strong>File uploaded successfully</strong><br>
+                            <div class="file-name">${file.name}</div>
+                        </div>
+                    `;
+                    this.trackAction();
+                }
+            }
+
+            showUpgradeModal() {
+                document.getElementById('upgradeModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            showRateLimitModal(message) {
+                const modal = document.getElementById('rateLimitModal');
+                const messageDiv = document.getElementById('rateLimitMessage');
+                messageDiv.textContent = message;
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            hideModal(modalId) {
+                document.getElementById(modalId).style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+
+            toggleView() {
+                const quickForm = document.querySelector('.quick-form');
+                const chatInterface = document.querySelector('.chat-interface');
+                const toggleButton = document.querySelector('#toggleView');
+                
+                // Check if elements exist
+                if (!quickForm || !chatInterface || !toggleButton) {
+                    console.error('Toggle view elements not found');
+                    return;
+                }
+
+                if (quickForm.style.display === 'none') {
+                    // Show form, hide chat
+                    quickForm.style.display = 'block';
+                    chatInterface.style.display = 'none';
+                    toggleButton.innerHTML = '<i class="fas fa-comments"></i> <span>Chat Only</span>';
+                } else {
+                    // Hide form, show chat
+                    quickForm.style.display = 'none';
+                    chatInterface.style.display = 'flex';
+                    chatInterface.style.flex = '1';
+                    toggleButton.innerHTML = '<i class="fas fa-bolt"></i> <span>Quick Form</span>';
+                }
+
+                this.trackAction();
+            }
+
+            checkInputs() {
+                const cvTextarea = document.querySelector('.form-textarea');
+                const jobTextareas = document.querySelectorAll('.form-textarea');
+                const cvFileInput = document.getElementById('cvFile');
+                const analyzeBtn = document.querySelector('.analyze-button');
+                
+                // Check if elements exist before accessing them
+                if (!cvTextarea || !jobTextareas[1] || !analyzeBtn) {
+                    return;
+                }
+                
+                const cvText = cvTextarea.value;
+                const jobText = jobTextareas[1].value;
+                const cvFile = cvFileInput ? cvFileInput.files[0] : null;
+                
+                analyzeBtn.disabled = !(jobText && (cvText || cvFile));
+            }
+        }
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing app...');
+            
+            try {
+                const app = new CVAutomationApp();
+
+                // Enable/disable analyze button based on inputs - check if elements exist
+                const textareas = document.querySelectorAll('.form-textarea');
+                textareas.forEach(textarea => {
+                    textarea.addEventListener('input', () => app.checkInputs());
+                });
+
+                const cvFileInput = document.getElementById('cvFile');
+                if (cvFileInput) {
+                    cvFileInput.addEventListener('change', () => app.checkInputs());
+                }
+
+                console.log('App initialized successfully');
+            } catch (error) {
+                console.error('App initialization error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
