@@ -11,11 +11,16 @@ class CVProcessor:
     
     def __init__(self):
         self.skill_keywords = {
-            'programming': ['python', 'java', 'javascript', 'c++', 'c#', 'php', 'ruby', 'go', 'rust', 'swift'],
-            'web': ['html', 'css', 'react', 'angular', 'vue', 'node.js', 'express', 'django', 'flask'],
-            'database': ['sql', 'mysql', 'postgresql', 'mongodb', 'redis', 'elasticsearch'],
-            'cloud': ['aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform'],
-            'tools': ['git', 'jenkins', 'jira', 'confluence', 'slack']
+            'programming': ['python', 'java', 'javascript', 'typescript', 'c++', 'c#', 'php', 'ruby', 'go', 'rust', 'swift', 'kotlin', 'scala', 'r', 'matlab'],
+            'web': ['html', 'css', 'react', 'angular', 'vue', 'node.js', 'express', 'django', 'flask', 'fastapi', 'spring', 'laravel', 'rails', 'nextjs', 'nuxt'],
+            'database': ['sql', 'mysql', 'postgresql', 'mongodb', 'redis', 'elasticsearch', 'oracle', 'sqlite', 'cassandra', 'dynamodb', 'neo4j'],
+            'cloud': ['aws', 'azure', 'gcp', 'google cloud', 'docker', 'kubernetes', 'terraform', 'ansible', 'jenkins', 'github actions', 'gitlab ci'],
+            'tools': ['git', 'jira', 'confluence', 'slack', 'figma', 'adobe', 'photoshop', 'sketch', 'linux', 'windows', 'macos'],
+            'data_science': ['pandas', 'numpy', 'scikit-learn', 'tensorflow', 'pytorch', 'keras', 'tableau', 'power bi', 'excel', 'spark'],
+            'mobile': ['react native', 'flutter', 'swift', 'kotlin', 'ionic', 'xamarin', 'android', 'ios'],
+            'testing': ['jest', 'pytest', 'selenium', 'cypress', 'junit', 'mocha', 'testing', 'unit test', 'integration test'],
+            'security': ['cybersecurity', 'penetration testing', 'ethical hacking', 'security', 'ssl', 'oauth', 'jwt'],
+            'management': ['project management', 'agile', 'scrum', 'kanban', 'team lead', 'leadership', 'management']
         }
     
     def extract_cv_data(self, cv_text: str) -> CandidateCV:
@@ -68,25 +73,50 @@ class CVProcessor:
         """Extract candidate name from CV text"""
         lines = text.strip().split('\n')
         
-        # Look for common name patterns
+        # Enhanced name patterns with more variations
         name_patterns = [
-            r'Name[:\s]+([A-Za-z\s]+)',
-            r'^([A-Z][a-z]+\s+[A-Z][a-z]+)',
-            r'([A-Z][a-z]+\s+[A-Z][a-z]+\s+[A-Z][a-z]+)'
+            r'(?:Name|Full Name|Candidate Name)[:\s]+([A-Za-z\s\-\'\.]+)',
+            r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\s*$',  # 2-4 names at start of line
+            r'([A-Z][A-Z\s]+[A-Z])',  # ALL CAPS names
+            r'([A-Z][a-z]+\s+[A-Z]\.?\s+[A-Z][a-z]+)',  # First Middle Last
+            r'([A-Z][a-z]+(?:\s+[a-z]+)?\s+[A-Z][a-z]+)',  # First von Last
         ]
         
         for pattern in name_patterns:
             match = re.search(pattern, text, re.MULTILINE)
             if match:
-                return match.group(1).strip()
+                name = match.group(1).strip()
+                # Validate name (not too long, contains alphabetic chars)
+                if 2 <= len(name.split()) <= 5 and any(c.isalpha() for c in name):
+                    return self._clean_name(name)
         
-        # Fallback: use first non-empty line if it looks like a name
-        for line in lines[:5]:
+        # Fallback: analyze first few lines more intelligently
+        for line in lines[:8]:
             line = line.strip()
-            if line and len(line.split()) <= 4 and all(word.replace('-', '').isalpha() for word in line.split()):
-                return line
+            # Skip empty lines, emails, phones, addresses
+            if (line and not re.search(r'[@\+\d]', line) and 
+                len(line.split()) <= 4 and 
+                all(word.replace('-', '').replace("'", "").replace('.', '').isalpha() for word in line.split())):
+                if len(line) > 4:  # Avoid single letters or very short strings
+                    return self._clean_name(line)
         
         return "Unknown Candidate"
+    
+    def _clean_name(self, name: str) -> str:
+        """Clean and format extracted name"""
+        # Remove extra whitespace and common prefixes/suffixes
+        name = re.sub(r'\s+', ' ', name.strip())
+        name = re.sub(r'^(Mr|Ms|Mrs|Dr|Prof)\.?\s+', '', name, flags=re.IGNORECASE)
+        
+        # Title case
+        words = []
+        for word in name.split():
+            if word.upper() in ['II', 'III', 'IV', 'JR', 'SR']:
+                words.append(word.upper())
+            else:
+                words.append(word.capitalize())
+        
+        return ' '.join(words)
     
     def _extract_contact_info(self, text: str) -> ContactInfo:
         """Extract contact information"""
@@ -253,8 +283,18 @@ class CVProcessor:
             # Calculate education match
             education_score = self._calculate_education_match(cv.education, job_requirements.education_requirements)
             
-            # Overall score (weighted average)
-            overall_score = (skills_score * 0.5 + experience_score * 0.3 + education_score * 0.2)
+            # Calculate additional factors
+            career_progression_score = self._calculate_career_progression(cv.experience)
+            skills_depth_score = self._calculate_skills_depth(cv.skills, cv.total_experience_years)
+            
+            # Overall score (weighted average with new factors)
+            overall_score = (
+                skills_score * 0.35 + 
+                experience_score * 0.25 + 
+                education_score * 0.15 +
+                career_progression_score * 0.15 +
+                skills_depth_score * 0.10
+            )
             
             # Generate recommendation
             recommendation = self._generate_recommendation(overall_score, skills_score, experience_score, education_score)
@@ -361,13 +401,57 @@ class CVProcessor:
         missing = required_skills_set - cv_skills_set
         return list(missing)
     
+    def _calculate_career_progression(self, experience: List[Experience]) -> float:
+        """Calculate career progression score based on role advancement"""
+        if len(experience) < 2:
+            return 50.0  # Neutral score for limited experience
+        
+        # Look for progression indicators
+        progression_indicators = ['senior', 'lead', 'manager', 'director', 'principal', 'architect', 'head']
+        
+        score = 50.0  # Base score
+        
+        for i, exp in enumerate(experience):
+            title_lower = exp.title.lower()
+            
+            # Check for upward progression in titles
+            for indicator in progression_indicators:
+                if indicator in title_lower:
+                    score += 10.0  # Boost for leadership roles
+                    break
+            
+            # Check for increasing responsibility (longer tenures at later roles)
+            if i > 0 and exp.duration_months > experience[i-1].duration_months:
+                score += 5.0
+        
+        return min(100.0, score)
+    
+    def _calculate_skills_depth(self, skills: List[str], years_experience: float) -> float:
+        """Calculate skills depth vs experience ratio"""
+        if years_experience == 0:
+            return 0.0
+        
+        # Expected skills per year of experience
+        expected_skills_ratio = 3.0  # 3 skills per year is reasonable
+        actual_ratio = len(skills) / years_experience
+        
+        # Score based on how close to expected ratio
+        if actual_ratio >= expected_skills_ratio:
+            return 100.0
+        else:
+            return (actual_ratio / expected_skills_ratio) * 100.0
+
     def _generate_recommendation(self, overall_score: float, skills_score: float, experience_score: float, education_score: float) -> str:
         """Generate recommendation based on scores"""
-        if overall_score >= 80:
-            return "Strong match - Recommend proceeding with interview"
-        elif overall_score >= 60:
-            return "Good match - Consider for interview with some reservations"
-        elif overall_score >= 40:
-            return "Partial match - May be suitable for junior roles or with training"
+        if overall_score >= 85:
+            return "🟢 STRONG MATCH - Highly recommend proceeding with immediate interview. Excellent candidate."
+        elif overall_score >= 75:
+            return "🟢 GOOD MATCH - Recommend interview. Strong candidate with minor gaps."
+        elif overall_score >= 65:
+            return "🟡 MODERATE MATCH - Consider for interview. Some concerns to address."
+        elif overall_score >= 50:
+            return "🟡 PARTIAL MATCH - May suit with training or junior-level adjustment."
+        elif overall_score >= 35:
+            return "🔴 WEAK MATCH - Significant gaps. Consider only if desperate."
         else:
-            return "Poor match - Not recommended for this position"
+            return "🔴 POOR MATCH - Not recommended. Major misalignment with requirements."
