@@ -210,31 +210,53 @@ class CVProcessor:
         return education_list
     
     def _extract_experience(self, text: str) -> List[Experience]:
-        """Extract work experience"""
+        """Extract work experience with comprehensive date parsing"""
         experience_list = []
         
-        # Look for experience section
-        experience_pattern = r'(?:experience|employment|work history|professional)[:\s]+(.*?)(?:\n\s*\n|\n[A-Z]|$)'
-        experience_match = re.search(experience_pattern, text, re.IGNORECASE | re.DOTALL)
+        # Look for experience section first
+        experience_sections = [
+            r'(?:experience|employment|work history|professional experience|career)[:\s]+(.*?)(?=\n\s*(?:education|skills|projects|qualifications|references)|$)',
+            r'(?:work experience|professional background)[:\s]+(.*?)(?=\n\s*(?:education|skills|projects|qualifications|references)|$)'
+        ]
         
-        if experience_match:
-            experience_text = experience_match.group(1)
-            
-            # Extract job entries
-            job_pattern = r'([A-Za-z\s]+)\s*(?:at|@)\s*([A-Za-z\s&,.]+)(?:\s*[-–]\s*(\d{1,2})\s*(?:years?|months?|yrs?))?'
-            matches = re.finditer(job_pattern, experience_text, re.IGNORECASE)
+        experience_text = ""
+        for pattern in experience_sections:
+            match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+            if match:
+                experience_text = match.group(1)
+                break
+        
+        if not experience_text:
+            # Fallback: look for common job patterns throughout the text
+            experience_text = text
+        
+        # Enhanced patterns for different CV formats
+        job_patterns = [
+            # Standard format: Title, Company, Dates
+            r'([A-Za-z\s&,.-]{10,60})\n.*?([A-Za-z\s&,.-]{2,40})\n.*?(\d{1,2}\/\d{4}|[A-Za-z]{3,9}\s+\d{4}).*?(?:[-–]|to|present|\n).*?(\d{1,2}\/\d{4}|[A-Za-z]{3,9}\s+\d{4}|present)',
+            # Inline format: Title at Company (Date - Date)
+            r'([A-Za-z\s&,.-]{5,50})\s+(?:at|@|\|)\s+([A-Za-z\s&,.-]{2,40}).*?(\d{1,2}\/\d{4}|[A-Za-z]{3,9}\s+\d{4}).*?[-–].*?(\d{1,2}\/\d{4}|[A-Za-z]{3,9}\s+\d{4}|present)',
+            # Years only format: Title at Company (2020-2023)
+            r'([A-Za-z\s&,.-]{5,50})\s+(?:at|@|\|)\s+([A-Za-z\s&,.-]{2,40}).*?(\d{4}).*?[-–].*?(\d{4}|present)',
+            # Duration format: Title at Company - 2 years 3 months
+            r'([A-Za-z\s&,.-]{5,50})\s+(?:at|@|\|)\s+([A-Za-z\s&,.-]{2,40}).*?(\d{1,2})\s*(?:years?|yrs?)(?:\s*(\d{1,2})\s*(?:months?|mos?))?'
+        ]
+        
+        for pattern in job_patterns:
+            matches = re.finditer(pattern, experience_text, re.IGNORECASE | re.MULTILINE)
             
             for match in matches:
-                title = match.group(1).strip()
-                company = match.group(2).strip()
-                duration_text = match.group(3) if match.group(3) else "12"
+                title = self._clean_text(match.group(1))
+                company = self._clean_text(match.group(2))
                 
-                try:
-                    duration_months = int(duration_text) if duration_text.isdigit() else 12
-                except:
-                    duration_months = 12
+                # Skip if title or company seem invalid
+                if not self._is_valid_job_info(title, company):
+                    continue
                 
-                if title and company:
+                # Calculate duration based on pattern type
+                duration_months = self._calculate_job_duration(match.groups())
+                
+                if title and company and duration_months > 0:
                     experience_list.append(Experience(
                         title=title,
                         company=company,
@@ -242,6 +264,108 @@ class CVProcessor:
                         description=None,
                         skills_used=[]
                     ))
+        
+        # If no experiences found, try simple fallback
+        if not experience_list:
+            experience_list = self._fallback_experience_extraction(text)
+        
+        return experience_list
+    
+    def _clean_text(self, text: str) -> str:
+        """Clean extracted text"""
+        if not text:
+            return ""
+        # Remove extra whitespace and common prefixes
+        text = re.sub(r'\s+', ' ', text.strip())
+        text = re.sub(r'^[-•·\s]+', '', text)
+        return text
+    
+    def _is_valid_job_info(self, title: str, company: str) -> bool:
+        """Validate if extracted job info seems legitimate"""
+        # Skip if too short or contains invalid patterns
+        invalid_patterns = [
+            r'^\d+$',  # Just numbers
+            r'^[^a-zA-Z]*$',  # No letters
+            r'email|phone|address|linkedin',  # Contact info
+        ]
+        
+        for pattern in invalid_patterns:
+            if re.search(pattern, title.lower()) or re.search(pattern, company.lower()):
+                return False
+        
+        return len(title) >= 3 and len(company) >= 2
+    
+    def _calculate_job_duration(self, groups: tuple) -> int:
+        """Calculate job duration in months from regex groups"""
+        try:
+            if len(groups) >= 4:
+                start_date = groups[2]
+                end_date = groups[3]
+                
+                # Handle "present" or current job
+                if 'present' in end_date.lower() or 'current' in end_date.lower():
+                    import datetime
+                    current_year = datetime.datetime.now().year
+                    end_date = str(current_year)
+                
+                # Extract years from dates
+                start_year = self._extract_year_from_date(start_date)
+                end_year = self._extract_year_from_date(end_date)
+                
+                if start_year and end_year:
+                    years_diff = end_year - start_year
+                    return max(1, years_diff * 12)  # Convert to months, minimum 1 month
+                
+            # Handle direct year/month format (last group pattern)
+            elif len(groups) >= 3 and groups[2].isdigit():
+                years = int(groups[2])
+                months = 0
+                if len(groups) >= 4 and groups[3] and groups[3].isdigit():
+                    months = int(groups[3])
+                return years * 12 + months
+                
+        except Exception as e:
+            logger.debug(f"Error calculating duration: {e}")
+        
+        return 12  # Default to 1 year if calculation fails
+    
+    def _extract_year_from_date(self, date_str: str) -> Optional[int]:
+        """Extract year from various date formats"""
+        if not date_str:
+            return None
+        
+        # Look for 4-digit year
+        year_match = re.search(r'\b(19|20)\d{2}\b', date_str)
+        if year_match:
+            year = int(year_match.group())
+            if 1980 <= year <= 2030:  # Reasonable range
+                return year
+        
+        return None
+    
+    def _fallback_experience_extraction(self, text: str) -> List[Experience]:
+        """Fallback method for experience extraction"""
+        experience_list = []
+        
+        # Look for any mention of years of experience
+        total_exp_patterns = [
+            r'(\d+)\+?\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience|exp)',
+            r'(?:experience|exp).*?(\d+)\+?\s*(?:years?|yrs?)',
+            r'(\d+)\s*(?:years?|yrs?)\s*(?:experience|exp)'
+        ]
+        
+        for pattern in total_exp_patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                years = int(match.group(1))
+                experience_list.append(Experience(
+                    title="Professional Experience",
+                    company="Various",
+                    duration_months=years * 12,
+                    description=f"Total {years} years of professional experience mentioned",
+                    skills_used=[]
+                ))
+                break
         
         return experience_list
     
