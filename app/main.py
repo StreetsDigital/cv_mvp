@@ -54,19 +54,24 @@ except Exception as e:
 async def root():
     """Serve the main application page"""
     try:
-        with open("frontend/index.html", "r") as f:
+        with open("frontend/index_standalone.html", "r") as f:
             return HTMLResponse(content=f.read())
     except FileNotFoundError:
-        return HTMLResponse(content="""
-        <!DOCTYPE html>
-        <html>
-        <head><title>CV Automation</title></head>
-        <body>
-            <h1>CV Automation API</h1>
-            <p>Frontend not found. API is running at <a href="/docs">/docs</a></p>
-        </body>
-        </html>
-        """)
+        # Fallback to regular index.html
+        try:
+            with open("frontend/index.html", "r") as f:
+                return HTMLResponse(content=f.read())
+        except FileNotFoundError:
+            return HTMLResponse(content="""
+            <!DOCTYPE html>
+            <html>
+            <head><title>CV Automation</title></head>
+            <body>
+                <h1>CV Automation API</h1>
+                <p>Frontend not found. API is running at <a href="/docs">/docs</a></p>
+            </body>
+            </html>
+            """)
 
 @app.get("/health")
 async def health_check():
