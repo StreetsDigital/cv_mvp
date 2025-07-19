@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, Dict, Any, List
+from .cv_models import ComprehensiveScore
 
 class ChatMessage(BaseModel):
     """Chat message model"""
@@ -24,12 +25,13 @@ class CVAnalysisRequest(BaseModel):
     job_description: str = Field(..., min_length=1, max_length=10000)
 
 class CVAnalysisResponse(BaseModel):
-    """CV analysis response"""
+    """Enhanced CV analysis response with comprehensive scoring"""
     success: bool
     candidate_name: str
     overall_score: float
     recommendation: str
-    analysis: Dict[str, Any]
+    analysis: Dict[str, Any]  # Keep for backward compatibility
+    comprehensive_score: Optional[ComprehensiveScore] = None  # New detailed scoring
 
 class FileUploadResponse(BaseModel):
     """File upload response"""
