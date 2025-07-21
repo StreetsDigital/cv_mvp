@@ -435,16 +435,16 @@ if V11_AVAILABLE:
                 job_requirements=job_requirements,
                 session_id=session_id
             )
-        
-        # Convert to API response format
-        analysis_result = CVAnalysisResponse(
-            overall_score=comprehensive_score.overall_match_score,
-            skills_match=comprehensive_score.skills_match_score,
-            experience_match=comprehensive_score.experience_relevance_score,
-            detailed_analysis={
-                "seo_sem_score": comprehensive_score.seo_sem_score,
-                "martech_score": comprehensive_score.martech_operations_score,
-                "advanced_analytics_score": comprehensive_score.advanced_analytics_score,
+            
+            # Convert to API response format
+            analysis_result = CVAnalysisResponse(
+                overall_score=comprehensive_score.overall_match_score,
+                skills_match=comprehensive_score.skills_match_score,
+                experience_match=comprehensive_score.experience_relevance_score,
+                detailed_analysis={
+                    "seo_sem_score": comprehensive_score.seo_sem_score,
+                    "martech_score": comprehensive_score.martech_operations_score,
+                    "advanced_analytics_score": comprehensive_score.advanced_analytics_score,
                 "industry_specialization_score": comprehensive_score.industry_specialization_score,
                 "platform_leadership_score": comprehensive_score.platform_leadership_score,
                 "remote_capability_score": comprehensive_score.remote_capability_score,
