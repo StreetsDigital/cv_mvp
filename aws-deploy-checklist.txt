@@ -1,0 +1,46 @@
+# AWS DEPLOYMENT CHECKLIST
+# Check off each item as you complete it
+
+## Pre-Deployment Setup
+[ ] AWS account created/accessed
+[ ] IAM user created with name: cv-screening-deployer
+[ ] IAM policies attached:
+    [ ] AWSLambdaFullAccess
+    [ ] AmazonAPIGatewayAdministrator
+    [ ] AWSCloudFormationFullAccess
+    [ ] IAMFullAccess
+    [ ] AmazonS3FullAccess
+[ ] Access Key ID saved: ____________________
+[ ] Secret Access Key saved: ____________________
+
+## Tools Installation
+[ ] Node.js installed (verify: node --version)
+[ ] AWS CLI installed (verify: aws --version)
+[ ] Serverless installed (verify: serverless --version)
+
+## Configuration
+[ ] AWS credentials configured (verify: aws sts get-caller-identity)
+[ ] ANTHROPIC_API_KEY environment variable set
+[ ] Project directory accessed: cd "/Users/streetsdigital/Documents/Projects/Pydantic flow - CV Screener"
+[ ] npm install completed
+
+## Deployment
+[ ] Run: ./deploy-aws.sh OR serverless deploy
+[ ] Deployment successful
+[ ] API URL saved: https://______________________.execute-api.us-east-1.amazonaws.com/prod/
+
+## Testing
+[ ] Health check returns {"status": "healthy"}
+[ ] API config endpoint works
+[ ] CV analysis test successful
+[ ] Web interface loads
+
+## Post-Deployment
+[ ] CloudWatch logs accessible
+[ ] Monitoring set up
+[ ] Frontend updated with new API URL
+[ ] Documentation updated
+
+DEPLOYMENT COMPLETE: [ ]
+DATE: _______________
+DEPLOYED BY: _______________
