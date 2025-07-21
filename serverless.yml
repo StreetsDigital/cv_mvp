@@ -1,0 +1,86 @@
+service: cv-screening-api
+
+provider:
+  name: aws
+  runtime: python3.9
+  stage: ${opt:stage, 'prod'}
+  region: ${opt:region, 'us-east-1'}
+  timeout: 30
+  memorySize: 1024
+  environment:
+    ANTHROPIC_API_KEY: ${env:ANTHROPIC_API_KEY}
+    DEBUG: false
+    LOG_LEVEL: INFO
+    CORS_ORIGINS: '["*"]'
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "*"
+
+plugins:
+  - serverless-python-requirements
+  - serverless-wsgi
+
+custom:
+  wsgi:
+    app: app.main.app
+    packRequirements: false
+  pythonRequirements:
+    dockerizePip: non-linux
+    slim: true
+    strip: false
+    noDeploy:
+      - boto3
+      - botocore
+    pipCmdExtraArgs:
+      - --no-cache-dir
+
+functions:
+  api:
+    handler: wsgi_handler.handler
+    events:
+      - http:
+          path: /
+          method: any
+          cors: true
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+    environment:
+      PYTHONPATH: "/var/task:/var/runtime"
+
+package:
+  exclude:
+    - node_modules/**
+    - .git/**
+    - .pytest_cache/**
+    - tests/**
+    - "*.pyc"
+    - __pycache__/**
+    - .env
+    - .venv/**
+    - venv/**
+    - frontend/node_modules/**
+  include:
+    - app/**
+    - frontend/**
+    - requirements.txt
+
+resources:
+  Resources:
+    # API Gateway configuration for better performance
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'RestApiApigEvent'
