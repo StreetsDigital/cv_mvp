@@ -26,8 +26,31 @@ class CVAnalysisRequest(BaseModel):
 
 class CVAnalysisResponse(BaseModel):
     """Enhanced CV analysis response with comprehensive scoring"""
-    success: bool
+    success: bool = True
     candidate_name: str
+    candidate_email: Optional[str] = None
+    overall_score: float = Field(..., ge=0.0, le=100.0)
+    skills_match: float = Field(..., ge=0.0, le=100.0)
+    experience_match: float = Field(..., ge=0.0, le=100.0)
+    
+    # Enhanced scoring breakdown
+    detailed_analysis: Dict[str, Any] = Field(default_factory=dict)
+    
+    # Skills extraction
+    extracted_skills: List[str] = Field(default_factory=list)
+    enhanced_skills: Dict[str, List[str]] = Field(default_factory=dict)
+    
+    # Recommendations and insights
+    recommendations: List[str] = Field(default_factory=list)
+    strengths: List[str] = Field(default_factory=list)
+    areas_for_improvement: List[str] = Field(default_factory=list)
+    
+    # Interview suggestions
+    suggested_interview_questions: List[str] = Field(default_factory=list)
+    
+    # Metadata
+    processing_time_ms: Optional[float] = None
+    confidence_score: Optional[float] = None
     overall_score: float
     recommendation: str
     analysis: Dict[str, Any]  # Keep for backward compatibility

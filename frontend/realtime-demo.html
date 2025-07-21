@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced CV Screening v1.1 - Real-Time Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .demo-header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .demo-header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .demo-header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        
+        .features-banner {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            margin: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .features-banner h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        
+        .features-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .feature-badge {
+            background: #3498db;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .feature-badge.new {
+            background: #e74c3c;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .demo-instructions {
+            background: rgba(255, 255, 255, 0.9);
+            margin: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .demo-instructions h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+        }
+        
+        .demo-instructions ol {
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .demo-instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .sample-data {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .sample-data h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+        
+        .sample-data pre {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        
+        .copy-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .copy-button:hover {
+            background: #218838;
+        }
+        
+        #cv-analyzer-container {
+            margin: 20px;
+        }
+        
+        .footer {
+            background: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>🚀 Enhanced CV Screening v1.1</h1>
+        <div class="subtitle">Real-Time Process Visualization & Human-in-the-Loop Controls</div>
+    </div>
+    
+    <div class="features-banner">
+        <h3>✨ New Features in v1.1</h3>
+        <div class="features-list">
+            <span class="feature-badge new">Real-Time Updates</span>
+            <span class="feature-badge new">Process Transparency</span>
+            <span class="feature-badge new">Human Intervention</span>
+            <span class="feature-badge new">WebSocket Integration</span>
+            <span class="feature-badge">Enhanced AI Analysis</span>
+            <span class="feature-badge">Confidence Scoring</span>
+            <span class="feature-badge">Step-by-Step Explanations</span>
+        </div>
+    </div>
+    
+    <div class="demo-instructions">
+        <h3>🎯 How to Test the Real-Time CV Analyzer</h3>
+        <ol>
+            <li><strong>Wait for Connection:</strong> The WebSocket will connect automatically (green indicator)</li>
+            <li><strong>Paste Sample Data:</strong> Use the sample CV and job description below, or paste your own</li>
+            <li><strong>Start Analysis:</strong> Click "Start Real-Time Analysis" to begin</li>
+            <li><strong>Watch Real-Time Updates:</strong> See each AI processing step as it happens</li>
+            <li><strong>Interact When Prompted:</strong> Respond to human intervention requests</li>
+            <li><strong>View Results:</strong> See the comprehensive analysis results at the end</li>
+        </ol>
+        
+        <div class="sample-data">
+            <h4>📄 Sample CV Text</h4>
+            <pre id="sample-cv">John Smith
+Senior Digital Marketing Manager
+
+Contact: john.smith@email.com | LinkedIn: /in/johnsmith
+
+PROFESSIONAL SUMMARY
+Results-driven digital marketing professional with 8 years of experience in SEO, SEM, and marketing automation. Led teams of 12+ members and managed $2M+ annual advertising budgets. Expert in Google Ads, Facebook Ads, HubSpot, and Salesforce CRM.
+
+EXPERIENCE
+
+Senior Digital Marketing Manager | TechCorp (2020-Present)
+• Increased organic traffic by 150% through comprehensive SEO strategy
+• Managed Google Ads campaigns with average CTR of 3.2% and ROAS of 4.5x
+• Implemented marketing automation workflows reducing lead nurturing time by 40%
+• Led cross-functional team of 12 marketing specialists
+• Collaborated with sales team to improve lead quality, resulting in 25% increase in conversions
+
+Digital Marketing Specialist | GrowthCo (2018-2020)
+• Developed and executed SEM campaigns across Google Ads and Bing Ads
+• Created content marketing strategy that increased blog traffic by 200%
+• Managed social media advertising with focus on LinkedIn and Facebook
+• Analyzed campaign performance using Google Analytics and custom dashboards
+
+Marketing Coordinator | StartupXYZ (2016-2018)
+• Assisted in email marketing campaigns using Mailchimp and Constant Contact
+• Conducted keyword research and competitive analysis
+• Created landing pages and A/B tested conversion elements
+• Supported trade show planning and execution
+
+EDUCATION
+Bachelor of Science in Marketing | University of Business (2016)
+• Minor in Data Analytics
+• Graduated Magna Cum Laude (GPA: 3.8/4.0)
+
+SKILLS
+Technical: Google Ads, Facebook Ads Manager, HubSpot, Salesforce, Google Analytics, SEMrush, Ahrefs, Tableau, Python (basic), SQL, Excel (Advanced)
+Marketing: SEO, SEM, Content Marketing, Email Marketing, Social Media Marketing, Marketing Automation, Lead Generation, Conversion Optimization
+Leadership: Team Management, Project Management, Strategic Planning, Budget Management, Cross-functional Collaboration
+
+CERTIFICATIONS
+• Google Ads Certified (Search, Display, Shopping)
+• Google Analytics Individual Qualification (IQ)
+• HubSpot Inbound Marketing Certification
+• Facebook Blueprint Certification
+• Salesforce Marketing Cloud Email Specialist
+
+ACHIEVEMENTS
+• Increased company website conversion rate from 2.1% to 4.8%
+• Reduced cost per acquisition by 35% across all paid channels
+• Generated 500+ qualified leads monthly through integrated campaigns
+• Mentored 5 junior marketers, with 3 receiving promotions</pre>
+            <button class="copy-button" onclick="copyToClipboard('sample-cv')">📋 Copy CV</button>
+        </div>
+        
+        <div class="sample-data">
+            <h4>💼 Sample Job Description</h4>
+            <pre id="sample-job">Senior Digital Marketing Manager - SaaS Company
+
+We are seeking an experienced Senior Digital Marketing Manager to lead our digital marketing efforts for our B2B SaaS platform. The ideal candidate will have strong expertise in performance marketing, marketing automation, and data-driven decision making.
+
+REQUIREMENTS:
+• 5+ years of digital marketing experience, preferably in B2B SaaS
+• Expert-level knowledge of Google Ads, Facebook Ads, and LinkedIn Ads
+• Strong experience with marketing automation platforms (HubSpot, Marketo, or Pardot)
+• Proficiency in Google Analytics, SEMrush, or similar analytics tools
+• Experience with A/B testing and conversion rate optimization
+• Knowledge of SQL and data analysis tools (Tableau, Power BI, or similar)
+• Team leadership experience (managing 3+ direct reports)
+• Bachelor's degree in Marketing, Business, or related field
+
+PREFERRED QUALIFICATIONS:
+• Experience with Salesforce CRM
+• Knowledge of SEO best practices and content marketing
+• Familiarity with marketing attribution models
+• Experience in affiliate marketing or influencer partnerships
+• Advanced Excel skills and basic Python knowledge
+• Industry certifications (Google Ads, HubSpot, etc.)
+
+RESPONSIBILITIES:
+• Develop and execute comprehensive digital marketing strategies
+• Manage performance marketing campaigns across multiple channels
+• Lead marketing automation and lead nurturing programs
+• Analyze campaign performance and optimize for ROI
+• Collaborate with sales team on lead quality and conversion optimization
+• Manage marketing budget of $1.5M+ annually
+• Lead and mentor a team of 4 marketing specialists
+• Work with product team on go-to-market strategies
+• Stay current with digital marketing trends and best practices
+
+COMPANY CULTURE:
+• Fast-paced, data-driven environment
+• Remote-friendly with flexible work arrangements
+• Focus on professional development and career growth
+• Collaborative, cross-functional team structure
+• Results-oriented with emphasis on measurable outcomes</pre>
+            <button class="copy-button" onclick="copyToClipboard('sample-job')">📋 Copy Job Description</button>
+        </div>
+    </div>
+    
+    <div id="cv-analyzer-container">
+        <!-- Real-time CV analyzer will be injected here -->
+    </div>
+    
+    <div class="footer">
+        <p>Enhanced CV Screening v1.1 - Powered by Claude AI with Real-Time Process Visualization</p>
+        <p>Built with FastAPI, WebSockets, and modern JavaScript</p>
+    </div>
+    
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    // Temporarily change button text
+                    const button = element.parentNode.querySelector('.copy-button');
+                    const originalText = button.textContent;
+                    button.textContent = '✅ Copied!';
+                    button.style.background = '#28a745';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = '#28a745';
+                    }, 2000);
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                alert('Sample data copied to clipboard!');
+            }
+        }
+        
+        // Auto-fill sample data for demo
+        function autoFillSampleData() {
+            setTimeout(() => {
+                const cvTextarea = document.getElementById('cv-text');
+                const jobTextarea = document.getElementById('job-description');
+                
+                if (cvTextarea && jobTextarea) {
+                    // Add button to auto-fill
+                    const analyzerHeader = document.querySelector('.analyzer-header');
+                    if (analyzerHeader) {
+                        const autoFillButton = document.createElement('button');
+                        autoFillButton.textContent = '🚀 Use Sample Data';
+                        autoFillButton.style.cssText = `
+                            padding: 10px 20px;
+                            background: #17a2b8;
+                            color: white;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-weight: bold;
+                        `;
+                        autoFillButton.onclick = () => {
+                            cvTextarea.value = document.getElementById('sample-cv').textContent.trim();
+                            jobTextarea.value = document.getElementById('sample-job').textContent.trim();
+                            
+                            // Trigger input events to enable analysis button
+                            cvTextarea.dispatchEvent(new Event('input'));
+                            jobTextarea.dispatchEvent(new Event('input'));
+                            
+                            autoFillButton.textContent = '✅ Sample Data Loaded';
+                            autoFillButton.style.background = '#28a745';
+                        };
+                        
+                        analyzerHeader.appendChild(autoFillButton);
+                    }
+                }
+            }, 2000);
+        }
+        
+        // Initialize auto-fill when analyzer loads
+        document.addEventListener('DOMContentLoaded', autoFillSampleData);
+    </script>
+    
+    <!-- Load the real-time CV analyzer -->
+    <script src="js/realtime-cv-analyzer.js"></script>
+</body>
+</html>
