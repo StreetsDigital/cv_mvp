@@ -1,0 +1,26 @@
+# Vercel-optimized requirements for serverless deployment
+# Core FastAPI dependencies
+fastapi==0.104.1
+pydantic==2.5.0
+pydantic-settings==2.1.0
+email-validator==2.2.0
+
+# Anthropic AI
+anthropic==0.8.0
+
+# File processing (lightweight alternatives)
+PyPDF2==3.0.1
+python-docx==1.1.0
+python-multipart==0.0.6
+
+# Environment and configuration
+python-dotenv==1.0.0
+
+# WebSocket support (for v1.1 features)
+websockets==12.0
+
+# Basic text processing
+regex==2023.8.8
+
+# HTTP client
+httpx==0.25.2
