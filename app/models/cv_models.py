@@ -3,6 +3,25 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
 
+# Import enhanced digital media skills
+try:
+    from .digital_media.enhanced_skills_model import (
+        EnhancedDigitalMediaSkills, 
+        SEOSEMSkills, 
+        MarTechStack, 
+        AdvancedAnalytics,
+        AffiliateMarketingSkills,
+        InfluencerMarketingSkills,
+        PlatformLeadershipSkills,
+        IndustryVerticals,
+        RemoteWorkSkills,
+        ExecutiveSkills,
+        SalesMarketingIntegration
+    )
+except ImportError:
+    # Fallback if enhanced skills not available
+    EnhancedDigitalMediaSkills = None
+
 class SeniorityLevel(str, Enum):
     ENTRY = "entry"
     JUNIOR = "junior"
@@ -102,6 +121,10 @@ class SkillAssessment(BaseModel):
     years_experience: Optional[float] = None
     last_used: Optional[datetime] = None
     certified: bool = False
+    # Enhanced fields for digital media
+    skill_category: Optional[str] = None  # SEO, MarTech, Analytics, etc.
+    platform_specific: Optional[str] = None  # Meta, Google, TikTok, etc.
+    industry_specific: Optional[str] = None  # Healthcare, FinTech, etc.
 
 class DigitalPresence(BaseModel):
     """Digital presence and portfolio"""
@@ -145,6 +168,19 @@ class CandidateCV(BaseModel):
     detailed_skills: List[SkillAssessment] = Field(default_factory=list)
     certifications: List[Certification] = Field(default_factory=list)
     emerging_tech_familiarity: List[str] = Field(default_factory=list)
+    
+    # Enhanced Digital Media Skills (new)
+    enhanced_digital_skills: Optional[EnhancedDigitalMediaSkills] = None
+    seo_sem_expertise: List[str] = Field(default_factory=list)
+    martech_proficiency: List[str] = Field(default_factory=list)
+    advanced_analytics_skills: List[str] = Field(default_factory=list)
+    affiliate_marketing_experience: List[str] = Field(default_factory=list)
+    influencer_marketing_experience: List[str] = Field(default_factory=list)
+    platform_leadership_experience: List[str] = Field(default_factory=list)
+    industry_vertical_expertise: List[str] = Field(default_factory=list)
+    remote_collaboration_skills: List[str] = Field(default_factory=list)
+    executive_capabilities: List[str] = Field(default_factory=list)
+    sales_marketing_integration_skills: List[str] = Field(default_factory=list)
     
     # Education & Qualifications
     education: List[Education] = Field(default_factory=list)
@@ -203,6 +239,15 @@ class JobRequirements(BaseModel):
     preferred_skills: List[str] = Field(default_factory=list)
     emerging_tech_requirements: List[str] = Field(default_factory=list)
     
+    # Enhanced Digital Media Requirements (new)
+    required_seo_sem_skills: List[str] = Field(default_factory=list)
+    required_martech_skills: List[str] = Field(default_factory=list)
+    required_analytics_skills: List[str] = Field(default_factory=list)
+    required_industry_expertise: List[str] = Field(default_factory=list)
+    platform_leadership_required: bool = False
+    remote_work_required: bool = False
+    executive_level_role: bool = False
+    
     # Experience Requirements
     min_experience_years: float = Field(0.0, ge=0.0, le=50.0)
     max_experience_years: Optional[float] = Field(None, ge=0.0, le=50.0)
@@ -247,6 +292,18 @@ class ComprehensiveScore(BaseModel):
     leadership_score: float = Field(0.0, ge=0.0, le=100.0)
     education_score: float = Field(0.0, ge=0.0, le=100.0)
     career_progression_score: float = Field(0.0, ge=0.0, le=100.0)
+    
+    # Enhanced Digital Media Scoring (new)
+    seo_sem_score: float = Field(0.0, ge=0.0, le=100.0)
+    martech_operations_score: float = Field(0.0, ge=0.0, le=100.0)
+    advanced_analytics_score: float = Field(0.0, ge=0.0, le=100.0)
+    industry_specialization_score: float = Field(0.0, ge=0.0, le=100.0)
+    platform_leadership_score: float = Field(0.0, ge=0.0, le=100.0)
+    affiliate_marketing_score: float = Field(0.0, ge=0.0, le=100.0)
+    influencer_marketing_score: float = Field(0.0, ge=0.0, le=100.0)
+    remote_capability_score: float = Field(0.0, ge=0.0, le=100.0)
+    executive_readiness_score: float = Field(0.0, ge=0.0, le=100.0)
+    sales_marketing_integration_score: float = Field(0.0, ge=0.0, le=100.0)
     
     # Risk Assessment
     job_stability_score: float = Field(0.0, ge=0.0, le=100.0)

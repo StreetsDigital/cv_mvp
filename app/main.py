@@ -1,6 +1,6 @@
 import logging
 import uuid
-from fastapi import FastAPI, File, UploadFile, HTTPException, Request, Depends
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request, Depends, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -14,6 +14,9 @@ from .models.api_models import (
 )
 from .services.chat_service import ChatService
 from .services.cv_processor import CVProcessor
+from .services.enhanced_cv_processor import EnhancedCVProcessor  # New enhanced processor
+from .services.enhanced_cv_processor_v11 import EnhancedCVProcessorV11  # V1.1 processor with real-time updates
+from .endpoints.websocket_endpoints import websocket_analysis_endpoint, websocket_monitor_endpoint
 from .middleware.rate_limiting import check_rate_limit
 from .middleware.action_tracking import action_tracker
 from .utils.file_utils import FileProcessor
@@ -42,6 +45,7 @@ app.add_middleware(
 # Initialize services
 chat_service = ChatService()
 cv_processor = CVProcessor()
+enhanced_cv_processor = EnhancedCVProcessor(api_key=settings.anthropic_api_key)  # New enhanced processor
 file_processor = FileProcessor()
 
 # Mount static files
@@ -174,7 +178,7 @@ async def analyze_cv(
     request: Request,
     analysis_request: CVAnalysisRequest
 ):
-    """Direct CV analysis endpoint"""
+    """Standard CV analysis endpoint"""
     
     # Check rate limits
     rate_limit_response = check_rate_limit(request)
@@ -192,6 +196,87 @@ async def analyze_cv(
         
         # Perform analysis
         analysis_result = cv_processor.analyze_cv_match(cv_data, job_requirements)
+        
+        return analysis_result
+        
+    except Exception as e:
+        logger.error(f"Error analyzing CV: {str(e)}")
+        raise HTTPException(status_code=500, detail="Analysis failed")
+
+@app.post("/api/analyze-enhanced", response_model=CVAnalysisResponse)
+async def analyze_cv_enhanced(
+    request: Request,
+    analysis_request: CVAnalysisRequest
+):
+    """Enhanced CV analysis endpoint with new skill categories"""
+    
+    # Check rate limits
+    rate_limit_response = check_rate_limit(request)
+    if rate_limit_response:
+        raise HTTPException(status_code=429, detail=rate_limit_response)
+    
+    try:
+        # Parse job requirements first
+        from .models.cv_models import JobRequirements
+        from .services.chat_service import ChatService
+        
+        chat_service_instance = ChatService()
+        job_requirements = chat_service_instance._parse_job_description(analysis_request.job_description)
+        
+        # Convert to enhanced job requirements if needed
+        if not isinstance(job_requirements, JobRequirements):
+            # Create JobRequirements object from chat service output
+            job_requirements = JobRequirements(
+                title=getattr(job_requirements, 'title', 'Unknown Role'),
+                company=getattr(job_requirements, 'company', 'Unknown Company'),
+                description=analysis_request.job_description,
+                required_skills=getattr(job_requirements, 'required_skills', []),
+                preferred_skills=getattr(job_requirements, 'preferred_skills', [])
+            )
+        
+        # Process CV with enhanced processor
+        cv_data, comprehensive_score = await enhanced_cv_processor.process_enhanced_cv(
+            analysis_request.cv_text, 
+            job_requirements
+        )
+        
+        # Convert comprehensive score to CVAnalysisResponse format
+        analysis_result = CVAnalysisResponse(
+            overall_score=comprehensive_score.overall_match_score,
+            skills_match=comprehensive_score.skills_match_score,
+            experience_match=comprehensive_score.experience_relevance_score,
+            detailed_analysis={
+                "seo_sem_score": comprehensive_score.seo_sem_score,
+                "martech_score": comprehensive_score.martech_operations_score,
+                "advanced_analytics_score": comprehensive_score.advanced_analytics_score,
+                "industry_specialization_score": comprehensive_score.industry_specialization_score,
+                "platform_leadership_score": comprehensive_score.platform_leadership_score,
+                "remote_capability_score": comprehensive_score.remote_capability_score,
+                "executive_readiness_score": comprehensive_score.executive_readiness_score,
+                "traditional_scores": {
+                    "technical_skills": comprehensive_score.technical_skills_score,
+                    "leadership": comprehensive_score.leadership_score,
+                    "education": comprehensive_score.education_score,
+                    "cultural_fit": comprehensive_score.cultural_fit_score
+                }
+            },
+            recommendations=comprehensive_score.suggested_interview_questions or [],
+            candidate_name=cv_data.name,
+            candidate_email=cv_data.contact.email if cv_data.contact else None,
+            extracted_skills=cv_data.skills,
+            enhanced_skills={
+                "seo_sem": cv_data.seo_sem_expertise,
+                "martech": cv_data.martech_proficiency,
+                "advanced_analytics": cv_data.advanced_analytics_skills,
+                "affiliate_marketing": cv_data.affiliate_marketing_experience,
+                "influencer_marketing": cv_data.influencer_marketing_experience,
+                "platform_leadership": cv_data.platform_leadership_experience,
+                "industry_expertise": cv_data.industry_vertical_expertise,
+                "remote_skills": cv_data.remote_collaboration_skills,
+                "executive_skills": cv_data.executive_capabilities,
+                "sales_marketing": cv_data.sales_marketing_integration_skills
+            }
+        )
         
         return analysis_result
         
@@ -264,9 +349,109 @@ async def get_app_config():
             "linkedin_integration": settings.enable_linkedin_integration,
             "analytics": settings.enable_analytics,
             "vector_storage": settings.enable_vector_storage,
-            "workflow_persistence": settings.enable_workflow_persistence
+            "workflow_persistence": settings.enable_workflow_persistence,
+            "real_time_updates": True,  # V1.1 feature
+            "human_intervention": True  # V1.1 feature
         }
     }
+
+# WebSocket endpoints for real-time updates
+@app.websocket("/ws/analysis")
+async def websocket_analysis(websocket: WebSocket, session_id: str = Query(...)):
+    """WebSocket endpoint for real-time CV analysis updates"""
+    await websocket_analysis_endpoint(websocket, session_id)
+
+@app.websocket("/ws/monitor")
+async def websocket_monitor(websocket: WebSocket, admin_token: str = Query(...)):
+    """WebSocket endpoint for monitoring all sessions (admin only)"""
+    await websocket_monitor_endpoint(websocket, admin_token)
+
+@app.post("/api/analyze-realtime", response_model=CVAnalysisResponse)
+async def analyze_cv_realtime(
+    request: Request,
+    analysis_request: CVAnalysisRequest,
+    session_id: str = Query(..., description="WebSocket session ID for real-time updates")
+):
+    """Real-time CV analysis endpoint with WebSocket updates"""
+    
+    # Check rate limits
+    rate_limit_response = check_rate_limit(request)
+    if rate_limit_response:
+        raise HTTPException(status_code=429, detail=rate_limit_response)
+    
+    try:
+        # Parse job requirements
+        from .models.cv_models import JobRequirements
+        from .services.chat_service import ChatService
+        
+        chat_service_instance = ChatService()
+        job_requirements = chat_service_instance._parse_job_description(analysis_request.job_description)
+        
+        # Convert to enhanced job requirements if needed
+        if not isinstance(job_requirements, JobRequirements):
+            job_requirements = JobRequirements(
+                title=getattr(job_requirements, 'title', 'Unknown Role'),
+                company=getattr(job_requirements, 'company', 'Unknown Company'),
+                description=analysis_request.job_description,
+                required_skills=getattr(job_requirements, 'required_skills', []),
+                preferred_skills=getattr(job_requirements, 'preferred_skills', [])
+            )
+        
+        # Initialize V1.1 processor with session ID
+        enhanced_processor_v11 = EnhancedCVProcessorV11(
+            api_key=settings.anthropic_api_key
+        )
+        
+        # Process CV with real-time updates
+        cv_data, comprehensive_score = await enhanced_processor_v11.process_enhanced_cv_with_updates(
+            cv_text=analysis_request.cv_text,
+            job_requirements=job_requirements,
+            session_id=session_id
+        )
+        
+        # Convert to API response format
+        analysis_result = CVAnalysisResponse(
+            overall_score=comprehensive_score.overall_match_score,
+            skills_match=comprehensive_score.skills_match_score,
+            experience_match=comprehensive_score.experience_relevance_score,
+            detailed_analysis={
+                "seo_sem_score": comprehensive_score.seo_sem_score,
+                "martech_score": comprehensive_score.martech_operations_score,
+                "advanced_analytics_score": comprehensive_score.advanced_analytics_score,
+                "industry_specialization_score": comprehensive_score.industry_specialization_score,
+                "platform_leadership_score": comprehensive_score.platform_leadership_score,
+                "remote_capability_score": comprehensive_score.remote_capability_score,
+                "executive_readiness_score": comprehensive_score.executive_readiness_score,
+                "traditional_scores": {
+                    "technical_skills": comprehensive_score.technical_skills_score,
+                    "leadership": comprehensive_score.leadership_score,
+                    "education": comprehensive_score.education_score,
+                    "cultural_fit": comprehensive_score.cultural_fit_score
+                }
+            },
+            recommendations=comprehensive_score.suggested_interview_questions or [],
+            candidate_name=cv_data.name,
+            candidate_email=cv_data.contact.email if cv_data.contact else None,
+            extracted_skills=cv_data.skills,
+            enhanced_skills={
+                "seo_sem": cv_data.seo_sem_expertise,
+                "martech": cv_data.martech_proficiency,
+                "advanced_analytics": cv_data.advanced_analytics_skills,
+                "affiliate_marketing": cv_data.affiliate_marketing_experience,
+                "influencer_marketing": cv_data.influencer_marketing_experience,
+                "platform_leadership": cv_data.platform_leadership_experience,
+                "industry_expertise": cv_data.industry_vertical_expertise,
+                "remote_skills": cv_data.remote_collaboration_skills,
+                "executive_skills": cv_data.executive_capabilities,
+                "sales_marketing": cv_data.sales_marketing_integration_skills
+            }
+        )
+        
+        return analysis_result
+        
+    except Exception as e:
+        logger.error(f"Error in real-time CV analysis: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error analyzing CV")
 
 if __name__ == "__main__":
     import uvicorn
