@@ -1,10 +1,21 @@
 import logging
 import uuid
-from fastapi import FastAPI, File, UploadFile, HTTPException, Request, Depends, WebSocket
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from typing import Optional
+
+# Conditional WebSocket import for serverless compatibility
+try:
+    from fastapi import WebSocket
+    from .endpoints.websocket_endpoints import websocket_analysis_endpoint, websocket_monitor_endpoint
+    WEBSOCKET_AVAILABLE = True
+except ImportError:
+    WEBSOCKET_AVAILABLE = False
+    WebSocket = None
+    websocket_analysis_endpoint = None
+    websocket_monitor_endpoint = None
 
 # Local imports
 from .config import settings
@@ -15,8 +26,15 @@ from .models.api_models import (
 from .services.chat_service import ChatService
 from .services.cv_processor import CVProcessor
 from .services.enhanced_cv_processor import EnhancedCVProcessor  # New enhanced processor
-from .services.enhanced_cv_processor_v11 import EnhancedCVProcessorV11  # V1.1 processor with real-time updates
-from .endpoints.websocket_endpoints import websocket_analysis_endpoint, websocket_monitor_endpoint
+
+# Conditional v1.1 processor import
+try:
+    from .services.enhanced_cv_processor_v11 import EnhancedCVProcessorV11
+    V11_AVAILABLE = True
+except ImportError:
+    V11_AVAILABLE = False
+    EnhancedCVProcessorV11 = None
+
 from .middleware.rate_limiting import check_rate_limit
 from .middleware.action_tracking import action_tracker
 from .utils.file_utils import FileProcessor
@@ -355,59 +373,68 @@ async def get_app_config():
         }
     }
 
-# WebSocket endpoints for real-time updates
-@app.websocket("/ws/analysis")
-async def websocket_analysis(websocket: WebSocket, session_id: str = Query(...)):
-    """WebSocket endpoint for real-time CV analysis updates"""
-    await websocket_analysis_endpoint(websocket, session_id)
-
-@app.websocket("/ws/monitor")
-async def websocket_monitor(websocket: WebSocket, admin_token: str = Query(...)):
-    """WebSocket endpoint for monitoring all sessions (admin only)"""
-    await websocket_monitor_endpoint(websocket, admin_token)
-
-@app.post("/api/analyze-realtime", response_model=CVAnalysisResponse)
-async def analyze_cv_realtime(
-    request: Request,
-    analysis_request: CVAnalysisRequest,
-    session_id: str = Query(..., description="WebSocket session ID for real-time updates")
-):
-    """Real-time CV analysis endpoint with WebSocket updates"""
+# WebSocket endpoints for real-time updates (if available)
+if WEBSOCKET_AVAILABLE:
+    from fastapi import Query
     
-    # Check rate limits
-    rate_limit_response = check_rate_limit(request)
-    if rate_limit_response:
-        raise HTTPException(status_code=429, detail=rate_limit_response)
+    @app.websocket("/ws/analysis")
+    async def websocket_analysis(websocket: WebSocket, session_id: str = Query(...)):
+        """WebSocket endpoint for real-time CV analysis updates"""
+        await websocket_analysis_endpoint(websocket, session_id)
+
+    @app.websocket("/ws/monitor")
+    async def websocket_monitor(websocket: WebSocket, admin_token: str = Query(...)):
+        """WebSocket endpoint for monitoring all sessions (admin only)"""
+        await websocket_monitor_endpoint(websocket, admin_token)
+else:
+    logger.warning("WebSocket functionality not available in this deployment")
+
+# Real-time analysis endpoint (if v1.1 features available)
+if V11_AVAILABLE:
+    from fastapi import Query
     
-    try:
-        # Parse job requirements
-        from .models.cv_models import JobRequirements
-        from .services.chat_service import ChatService
+    @app.post("/api/analyze-realtime", response_model=CVAnalysisResponse)
+    async def analyze_cv_realtime(
+        request: Request,
+        analysis_request: CVAnalysisRequest,
+        session_id: str = Query(..., description="WebSocket session ID for real-time updates")
+    ):
+        """Real-time CV analysis endpoint with WebSocket updates"""
         
-        chat_service_instance = ChatService()
-        job_requirements = chat_service_instance._parse_job_description(analysis_request.job_description)
+        # Check rate limits
+        rate_limit_response = check_rate_limit(request)
+        if rate_limit_response:
+            raise HTTPException(status_code=429, detail=rate_limit_response)
         
-        # Convert to enhanced job requirements if needed
-        if not isinstance(job_requirements, JobRequirements):
-            job_requirements = JobRequirements(
-                title=getattr(job_requirements, 'title', 'Unknown Role'),
-                company=getattr(job_requirements, 'company', 'Unknown Company'),
-                description=analysis_request.job_description,
-                required_skills=getattr(job_requirements, 'required_skills', []),
-                preferred_skills=getattr(job_requirements, 'preferred_skills', [])
+        try:
+            # Parse job requirements
+            from .models.cv_models import JobRequirements
+            from .services.chat_service import ChatService
+            
+            chat_service_instance = ChatService()
+            job_requirements = chat_service_instance._parse_job_description(analysis_request.job_description)
+            
+            # Convert to enhanced job requirements if needed
+            if not isinstance(job_requirements, JobRequirements):
+                job_requirements = JobRequirements(
+                    title=getattr(job_requirements, 'title', 'Unknown Role'),
+                    company=getattr(job_requirements, 'company', 'Unknown Company'),
+                    description=analysis_request.job_description,
+                    required_skills=getattr(job_requirements, 'required_skills', []),
+                    preferred_skills=getattr(job_requirements, 'preferred_skills', [])
+                )
+            
+            # Initialize V1.1 processor with session ID
+            enhanced_processor_v11 = EnhancedCVProcessorV11(
+                api_key=settings.anthropic_api_key
             )
-        
-        # Initialize V1.1 processor with session ID
-        enhanced_processor_v11 = EnhancedCVProcessorV11(
-            api_key=settings.anthropic_api_key
-        )
-        
-        # Process CV with real-time updates
-        cv_data, comprehensive_score = await enhanced_processor_v11.process_enhanced_cv_with_updates(
-            cv_text=analysis_request.cv_text,
-            job_requirements=job_requirements,
-            session_id=session_id
-        )
+            
+            # Process CV with real-time updates
+            cv_data, comprehensive_score = await enhanced_processor_v11.process_enhanced_cv_with_updates(
+                cv_text=analysis_request.cv_text,
+                job_requirements=job_requirements,
+                session_id=session_id
+            )
         
         # Convert to API response format
         analysis_result = CVAnalysisResponse(
@@ -447,11 +474,14 @@ async def analyze_cv_realtime(
             }
         )
         
-        return analysis_result
-        
-    except Exception as e:
-        logger.error(f"Error in real-time CV analysis: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error analyzing CV")
+            return analysis_result
+            
+        except Exception as e:
+            logger.error(f"Error in real-time CV analysis: {str(e)}")
+            raise HTTPException(status_code=500, detail="Error analyzing CV")
+
+else:
+    logger.warning("Real-time analysis features not available in this deployment")
 
 if __name__ == "__main__":
     import uvicorn

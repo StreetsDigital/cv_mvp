@@ -3,15 +3,11 @@
   "builds": [
     {
       "src": "app/main.py",
-      "use": "@vercel/python",
+      "use": "@vercel/python@4.1.0",
       "config": {
-        "maxLambdaSize": "50mb",
+        "maxLambdaSize": "250mb",
         "runtime": "python3.9"
       }
-    },
-    {
-      "src": "frontend/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -29,7 +25,7 @@
     }
   ],
   "env": {
-    "PYTHONPATH": "/var/task:/var/task/app"
+    "PYTHONPATH": "/var/task"
   },
   "functions": {
     "app/main.py": {
