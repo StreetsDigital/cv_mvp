@@ -42,16 +42,38 @@ custom:
 
 functions:
   api:
-    handler: wsgi_handler.handler
+    handler: lambda_handler.handler
     events:
       - http:
           path: /
           method: any
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - X-Requested-With
+            allowCredentials: false
+            maxAge: 86400
       - http:
           path: /{proxy+}
           method: any
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - X-Requested-With
+            allowCredentials: false
+            maxAge: 86400
     environment:
       PYTHONPATH: "/var/task:/var/runtime"
 
@@ -74,13 +96,36 @@ package:
 
 resources:
   Resources:
-    # API Gateway configuration for better performance
+    # API Gateway CORS configuration for all response types
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Requested-With'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
         ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'RestApiApigEvent'
+    
+    GatewayResponseDefault5XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Requested-With'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: 'RestApiApigEvent'
+          
+    GatewayResponseAccessDenied:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Requested-With'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+        ResponseType: ACCESS_DENIED
         RestApiId:
           Ref: 'RestApiApigEvent'
