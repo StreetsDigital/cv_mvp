@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Enhanced CV Screening API - AWS SAM Template
+
+Parameters:
+  AnthropicApiKey:
+    Type: String
+    Description: Anthropic API Key for Claude AI
+    NoEcho: true
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 1024
+    Runtime: python3.9
+    Environment:
+      Variables:
+        ANTHROPIC_API_KEY: !Ref AnthropicApiKey
+        DEBUG: false
+        LOG_LEVEL: INFO
+        CORS_ORIGINS: '["*"]'
+
+Resources:
+  CVScreeningAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: cv-screening-api
+      CodeUri: .
+      Handler: lambda_handler.handler
+      Description: Enhanced CV Screening API with real-time analysis
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CVScreeningApiGateway
+            Path: /{proxy+}
+            Method: ANY
+        RootApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CVScreeningApiGateway
+            Path: /
+            Method: ANY
+
+  CVScreeningApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: cv-screening-api-gateway
+      StageName: prod
+      Cors:
+        AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Requested-With'"
+        AllowOrigin: "'*'"
+        MaxAge: "'86400'"
+      GatewayResponses:
+        DEFAULT_4xx:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Requested-With'"
+              Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+        DEFAULT_5xx:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Requested-With'"
+              Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+
+  CVScreeningLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${CVScreeningAPI}'
+      RetentionInDays: 14
+
+Outputs:
+  ApiGatewayUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${CVScreeningApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/'
+    Export:
+      Name: CVScreeningApiUrl
+  
+  LambdaFunctionArn:
+    Description: Lambda Function ARN
+    Value: !GetAtt CVScreeningAPI.Arn
+    Export:
+      Name: CVScreeningLambdaArn
