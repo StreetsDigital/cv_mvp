@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: cv-screener-automateengage
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: APP_NAME
+        value: CV Automation MVP
+      - key: DEBUG
+        value: false
+      - key: LOG_LEVEL
+        value: INFO
+      - key: ENABLE_ENHANCED_PROCESSING
+        value: true
+      - key: CLAUDE_MODEL
+        value: claude-3-sonnet-20240229
+      - key: MAX_FILE_SIZE_MB
+        value: 5
+      - key: MAX_MESSAGE_LENGTH
+        value: 4000
+    # You'll need to add your ANTHROPIC_API_KEY through the Render dashboard
