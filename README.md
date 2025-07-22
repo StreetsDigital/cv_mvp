@@ -1,134 +1,258 @@
-# CV Automation - Recruitment Assistant
+# 🎯 Enhanced CV Screening API v1.1
 
-A powerful AI-driven CV analysis and recruitment automation tool built with FastAPI and Claude AI.
+> AI-powered CV analysis with real-time processing, advanced scoring, and comprehensive candidate assessment.
 
-## Features
-
-- **CV Analysis**: Upload and analyze CVs in PDF, DOCX, or TXT format
-- **Job Matching**: Compare candidates against job requirements with detailed scoring
-- **Chat Interface**: Conversational AI assistant for interactive CV analysis
-- **Rate Limiting**: Built-in usage limits for free tier
-- **Premium Features**: Email automation, LinkedIn integration (coming soon)
-
-## Quick Start
-
-### 1. Environment Setup
+## 🚀 Quick Start
 
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd cv-automation-recruitment
+# 1. Clone repository
+git clone https://github.com/StreetsDigital/cv_mvp.git
+cd cv_mvp
 
+# 2. Set environment variables
+export ANTHROPIC_API_KEY="your-anthropic-api-key"
+
+# 3. Deploy to AWS (recommended)
+cd deployment/aws
+./deploy-with-aws-cli.sh
+
+# 4. Test your deployment
+curl https://your-api-url.amazonaws.com/prod/health
+```
+
+## 📋 Table of Contents
+
+- [Features](#features)
+- [Architecture](#architecture)
+- [Deployment Options](#deployment-options)
+- [API Documentation](#api-documentation)
+- [Development](#development)
+- [Testing](#testing)
+- [Documentation](#documentation)
+
+## ✨ Features
+
+### Core Functionality
+- 🧠 **AI-Powered CV Analysis** using Claude AI
+- 📊 **Advanced Scoring Engine** with 11 specialized metrics
+- 📄 **Multi-Format Support** (PDF, DOCX, TXT)
+- 🎯 **Job Matching** with detailed compatibility analysis
+- 🔄 **Real-time Processing** with WebSocket updates
+- 🛡️ **Enterprise Security** with rate limiting and CORS
+
+### Advanced Features
+- 📈 **Enhanced Skill Categories**: SEO/SEM, MarTech, Analytics, Platform Leadership
+- 🎨 **Digital Media Expertise** assessment
+- 👥 **Executive Readiness** evaluation
+- 🌐 **Remote Work Capability** scoring
+- 🏢 **Industry Specialization** analysis
+- 💼 **Human-in-the-Loop** intervention controls
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   API Gateway   │    │  Lambda/Server  │
+│                 │───▶│                 │───▶│                 │
+│ React/Vanilla   │    │  CORS Enabled   │    │   FastAPI App   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                        │
+                                               ┌─────────────────┐
+                                               │   Claude AI     │
+                                               │   Integration   │
+                                               └─────────────────┘
+```
+
+### Tech Stack
+- **Backend**: FastAPI, Pydantic, Python 3.9
+- **AI**: Anthropic Claude API
+- **Frontend**: Vanilla JavaScript, HTML5, CSS3
+- **Deployment**: AWS Lambda, API Gateway, Vercel
+- **Testing**: Pytest, asyncio testing
+
+## 🚀 Deployment Options
+
+### Option 1: AWS Lambda (Recommended)
+```bash
+cd deployment/aws
+export ANTHROPIC_API_KEY="your-key"
+./deploy-with-aws-cli.sh
+```
+- ✅ Auto-scaling
+- ✅ Pay-per-request
+- ✅ Enhanced CORS support
+- ✅ Enterprise-grade security
+
+### Option 2: Vercel Serverless
+```bash
+cd deployment/vercel
+vercel deploy
+```
+- ✅ Quick deployment
+- ✅ Global CDN
+- ❌ Limited WebSocket support
+
+### Option 3: Traditional Server
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+📖 **Detailed Guides**: See [`docs/deployment/`](docs/deployment/)
+
+## 📚 API Documentation
+
+### Core Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check |
+| `/api/config` | GET | App configuration |
+| `/api/analyze` | POST | Standard CV analysis |
+| `/api/analyze-enhanced` | POST | Enhanced CV analysis |
+| `/api/upload` | POST | File upload |
+
+### Example Usage
+
+```javascript
+// Analyze CV
+const response = await fetch('/api/analyze-enhanced', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    cv_text: "John Smith, Software Engineer...",
+    job_description: "Senior Python Developer..."
+  })
+});
+
+const analysis = await response.json();
+console.log(analysis.overall_score); // 85.5
+```
+
+📖 **Full API Docs**: See [`docs/api/`](docs/api/)
+
+## 🛠️ Development
+
+### Local Setup
+```bash
 # Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Set environment variables
+export ANTHROPIC_API_KEY="your-key"
+export DEBUG=true
+
+# Run development server
+uvicorn app.main:app --reload
 ```
 
-### 2. Configuration
+### Project Structure
+```
+cv-screening-api/
+├── app/                     # Main application
+│   ├── main.py             # FastAPI app
+│   ├── config.py           # Configuration
+│   ├── models/             # Pydantic models
+│   ├── services/           # Business logic
+│   ├── middleware/         # Custom middleware
+│   └── utils/              # Utilities
+├── frontend/               # Web interface
+├── tests/                  # Test suite
+├── deployment/             # Deployment configs
+├── docs/                   # Documentation
+└── scripts/               # Utility scripts
+```
+
+## 🧪 Testing
 
 ```bash
-# Copy environment template
-cp .env.example .env
+# Run all tests
+python -m pytest
 
-# Edit .env with your API keys
-# Required: ANTHROPIC_API_KEY
+# Run with coverage
+python -m pytest --cov=app
+
+# Test specific component
+python -m pytest tests/test_cv_processor.py
+
+# Integration tests
+python scripts/test_production_ready.py
 ```
 
-### 3. Run Locally
+## 📖 Documentation
 
-```bash
-# Start the development server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+### Quick Links
+- 🚀 [AWS Deployment Guide](docs/deployment/AWS_COMPLETE_SETUP_GUIDE.md)
+- 🔧 [CORS Troubleshooting](docs/troubleshooting/CORS_TROUBLESHOOTING_GUIDE.md)
+- 📊 [API Implementation](docs/api/ENHANCED_IMPLEMENTATION_GUIDE.md)
+- 🐛 [Troubleshooting](docs/troubleshooting/)
 
-# Access the application
-# http://localhost:8000
+### Documentation Structure
+```
+docs/
+├── deployment/          # Deployment guides
+│   ├── AWS_COMPLETE_SETUP_GUIDE.md
+│   ├── SECURE_AWS_DEPLOYMENT.md
+│   └── VERCEL_DEPLOYMENT_GUIDE.md
+├── api/                # API documentation
+│   ├── ENHANCED_IMPLEMENTATION_GUIDE.md
+│   └── V11_IMPLEMENTATION_SUMMARY.md
+└── troubleshooting/    # Guides and FAQs
+    └── CORS_TROUBLESHOOTING_GUIDE.md
 ```
 
-### 4. Deploy to Vercel
+## 🔒 Security
 
-```bash
-# Install Vercel CLI
-npm i -g vercel
+- ✅ **Input Validation**: Pydantic models
+- ✅ **Rate Limiting**: Configurable limits
+- ✅ **CORS Protection**: Multi-layer CORS handling
+- ✅ **Secret Management**: Environment variables
+- ✅ **Error Handling**: Secure error responses
 
-# Deploy
-vercel
+## 💰 Cost Estimate
 
-# Set environment variables in Vercel dashboard:
-# - ANTHROPIC_API_KEY
-# - SECRET_KEY
-```
+### AWS Lambda (Recommended)
+- **Free Tier**: 1M requests/month FREE
+- **After Free Tier**: ~$0.20 per 1M requests
+- **Typical Usage**: $1-5/month
 
-## API Endpoints
+### Vercel
+- **Hobby Plan**: FREE for personal projects
+- **Pro Plan**: $20/month for commercial use
 
-- `GET /` - Main application interface
-- `POST /api/chat` - Chat with AI assistant
-- `POST /api/upload` - Upload CV files
-- `POST /api/analyze` - Direct CV analysis
-- `GET /api/config` - Application configuration
-- `GET /health` - Health check
+## 🤝 Contributing
 
-## Usage
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-### Quick Analysis
-1. Upload a CV file or paste CV text
-2. Paste job description
-3. Click "Analyze CV Match"
-4. Review detailed analysis and scoring
+## 📄 License
 
-### Chat Interface
-1. Use the chat interface for conversational analysis
-2. Upload files directly in chat
-3. Ask specific questions about candidates
-4. Get detailed insights and recommendations
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Architecture
+## 🆘 Support
 
-```
-app/
-├── main.py              # FastAPI application
-├── config.py            # Settings and configuration
-├── models/              # Pydantic data models
-├── services/            # Business logic
-├── middleware/          # Rate limiting, tracking
-└── utils/              # File processing utilities
+- 📧 **Issues**: [GitHub Issues](https://github.com/StreetsDigital/cv_mvp/issues)
+- 📖 **Documentation**: [docs/](docs/)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/StreetsDigital/cv_mvp/discussions)
 
-frontend/
-├── index.html          # Main UI
-├── css/styles.css      # Styling
-└── js/app.js          # Frontend logic
-```
+## 🎯 Roadmap
 
-## Environment Variables
+- [ ] Multi-language support
+- [ ] Advanced analytics dashboard
+- [ ] Integration with ATS systems
+- [ ] Mobile application
+- [ ] Batch processing capabilities
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `ANTHROPIC_API_KEY` | Claude AI API key | Yes |
-| `SECRET_KEY` | Application secret key | No |
-| `DEBUG` | Debug mode | No |
-| `CORS_ORIGINS` | Allowed origins | No |
-| `PREMIUM_CONTACT_EMAIL` | Contact for premium features | No |
+---
 
-## Development
+**🚀 Built with [Claude Code](https://claude.ai/code) - AI-powered development**
 
-### Code Structure
-- **Models**: Pydantic models for data validation
-- **Services**: Business logic for CV processing and AI chat
-- **Middleware**: Rate limiting and action tracking
-- **Frontend**: Vanilla JavaScript with modern CSS
-
-### Adding Features
-1. Define models in `app/models/`
-2. Implement business logic in `app/services/`
-3. Add API endpoints in `app/main.py`
-4. Update frontend in `frontend/`
-
-## License
-
-MIT License - see LICENSE file for details.
-
-## Support
-
-For premium features and enterprise support, contact: andrew@automateengage.com
+*Transform your recruitment process with AI-driven CV analysis and real-time insights.*
