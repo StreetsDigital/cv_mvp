@@ -39,6 +39,14 @@ from .middleware.rate_limiting import check_rate_limit
 from .middleware.action_tracking import action_tracker
 from .utils.file_utils import FileProcessor
 
+# Conditional keep-alive import for Render deployment
+try:
+    from .services.keep_alive import KeepAliveService
+    KEEP_ALIVE_AVAILABLE = True
+except ImportError:
+    KEEP_ALIVE_AVAILABLE = False
+    KeepAliveService = None
+
 # Configure logging
 logging.basicConfig(level=getattr(logging, settings.log_level))
 logger = logging.getLogger(__name__)
@@ -65,6 +73,11 @@ chat_service = ChatService()
 cv_processor = CVProcessor()
 enhanced_cv_processor = EnhancedCVProcessor(api_key=settings.anthropic_api_key)  # New enhanced processor
 file_processor = FileProcessor()
+
+# Initialize keep-alive service for Render deployment
+keep_alive_service = None
+if KEEP_ALIVE_AVAILABLE and hasattr(settings, 'app_url') and settings.app_url:
+    keep_alive_service = KeepAliveService(settings.app_url)
 
 # Mount static files
 try:
@@ -482,6 +495,27 @@ if V11_AVAILABLE:
 
 else:
     logger.warning("Real-time analysis features not available in this deployment")
+
+@app.on_event("startup")
+async def startup_event():
+    """Application startup event"""
+    logger.info(f"Starting {settings.app_name}")
+    
+    # Start keep-alive service if available
+    if keep_alive_service:
+        import asyncio
+        asyncio.create_task(keep_alive_service.start_keep_alive())
+        logger.info("Keep-alive service started")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Application shutdown event"""
+    logger.info("Shutting down application")
+    
+    # Stop keep-alive service
+    if keep_alive_service:
+        keep_alive_service.stop()
+        logger.info("Keep-alive service stopped")
 
 if __name__ == "__main__":
     import uvicorn
